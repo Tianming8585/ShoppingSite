@@ -164,7 +164,7 @@ public class Resource {
 	}
 
 	public static void showProducts(PrintWriter pw) {
-		Query query = Resource.sql_select(Product.class.getName());
+		Query query = sql_select(Product.class.getName());
 		List<Product> allProducts = (List<Product>) query.execute();
 		pw.println("<h2>Show products</h2>");
 		pw.println("<table style=\"border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
@@ -235,12 +235,7 @@ public class Resource {
 		for (int i = 0; i < productName.size(); i++) {
 			System.out.println(productName.get(i) + " , " + productPrice.get(i));
 			Product product = new Product(productName.get(i), productPrice.get(i));
-			try {
-				PersistenceManager pm = PMF.get().getPersistenceManager();
-				pm.makePersistent(product);
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
+			pm.makePersistent(product);
 		}
 	}
 
@@ -266,11 +261,11 @@ public class Resource {
 			throws ServletException, IOException {
 		PrintWriter pw = response.getWriter();
 		Cookie ck[] = request.getCookies();
-		if (Resource.getUsername(ck).equals("")) {
-			Resource.redirect(response, Resource.url_SignIn);
+		if (getUsername(ck).equals("")) {
+			redirect(response, url_SignIn);
 			return;
 		} else {
-			Resource.createSignOutButton(pw);
+			createSignOutButton(pw);
 		}
 	}
 }

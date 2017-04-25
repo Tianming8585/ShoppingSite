@@ -15,6 +15,15 @@
 <head>
 <meta http-equiv="content-type" content="text/html; charset=UTF-8">
 <title>Shopping</title>
+<style type="text/css">
+.div_right_bottom {
+	width: 25px;
+	float: right;
+	position: fixed;
+	right: 0px;
+	bottom: 0px;
+}
+</style>
 </head>
 
 <body>
@@ -29,5 +38,6 @@
 	<p>
 		<a href="ViewProducts.jsp">View all products</a>
 	</p>
+	<a href="AddProduct.html" class="div_right_bottom">.</a>
 </body>
 </html>

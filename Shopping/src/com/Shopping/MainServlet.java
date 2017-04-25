@@ -1,4 +1,4 @@
-package com.Shopping.servlets;
+package com.Shopping;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -6,11 +6,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import com.Shopping.Member;
-import com.Shopping.Order;
-import com.Shopping.Product;
-import com.Shopping.Resource;
 
 public class MainServlet extends HttpServlet {
 
