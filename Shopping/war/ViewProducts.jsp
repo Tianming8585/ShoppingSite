@@ -10,6 +10,17 @@
 ://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
+<jsp:include page="Link.jsp" />
+<style type="text/css">
+body {
+	background-image:
+		url("https://proto-space.s3.amazonaws.com/uploads/captured_image/name/555/poelugybvlmlvgrhstnp.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: white;
+	'
+}
+</style>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Show all products</title>
 </head>

@@ -10,25 +10,41 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
-<META HTTP-EQUIV="refresh" CONTENT="15; url=/Order.jsp">
+<style type="text/css">
+body {
+	background-image:
+		url("https://proto-space.s3.amazonaws.com/uploads/captured_image/name/555/poelugybvlmlvgrhstnp.jpg");
+	background-size: cover;
+	background-repeat: no-repeat;
+	color: white;
+	padding: 5px;
+}
+</style>
+<jsp:include page="Link.jsp" />
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <title>Order</title>
 </head>
 <body>
-	<jsp:include page="AddHomeButton.jsp" />
+	<%
+		if (!Resource.isSignIn(request.getCookies())) {
+			Resource.redirect(request, response, Resource.url_SignIn);
+			return;
+		}
+	%>
 	<jsp:include page="Cookie.jsp" />
-	<jsp:include page="CheckSignInStatus.jsp" />
-	<h2>Order</h2>
+	<h2 style="color: white;">Order</h2>
 	<p></p>
 	<form action="servlet" method="GET" id="orderForm">
 		<jsp:include page="MakeProductMenu.jsp" />
-		<h4>Amount :</h4>
-		<input type="text" name="amount" /> <input type="hidden" name="url"
-			value="Order.jsp" />
+		<h4 style="color: white;">Amount :</h4>
+		<input type="text" class="form-control" name="amount" /> <input
+			type="hidden" name="url" value="Order.jsp" />
 		<p>
-			<input type="submit" name="btnValue" value="Order" />
+			<button type="submit" class="btn btn-primary value=" name="btnValue"
+				value="Order">Order</button>
 	</form>
 	<br>
 	<jsp:include page="ShowUserOrders.jsp" />
+	<jsp:include page="AddHomeButton.jsp" />
 </body>
 </html>

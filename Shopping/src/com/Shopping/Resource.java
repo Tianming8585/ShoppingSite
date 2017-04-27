@@ -12,6 +12,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 public class Resource {
 
@@ -49,8 +50,7 @@ public class Resource {
 	// won't change
 	public static void redirect(HttpServletRequest req, HttpServletResponse resp, String link)
 			throws ServletException, IOException {
-		RequestDispatcher rd = req.getRequestDispatcher(link);
-		rd.forward(req, resp);
+		req.getRequestDispatcher(link).forward(req, resp);
 	}
 
 	// change
@@ -66,20 +66,25 @@ public class Resource {
 	public static void createSignOutButton(PrintWriter pw) {
 		pw.println("<form style=\"display:inline\" method=\'GET\' action=\"" + url_Servlet + "\">");
 		pw.println("<input type=\"hidden\" name=\"url\"value=\"" + url_SignOut + "\" />");
-		pw.println("<input type=\"submit\" value=\"" + url_SignOut + "\" />");
+		pw.println(
+				"<input type=\"submit\" class='btn btn-primary btn-lg' type=\"button\" class=\"btn btn-default\" value=\""
+						+ url_SignOut + "\" />");
 		pw.println("</form>");
+		// class=\"btn btn-primar\"
 	}
 
 	public static void createTopButton(PrintWriter pw, String link, String value) {
 		pw.println("<form style=\"display:inline\" action=\"" + link + "\">");
-		pw.println("<input type=\"submit\" value=\"" + value + "\" />");
+		pw.println("<button class=\"btn btn-primary value=\" type=\"submit\" value=\"" + value + "\">" + value
+				+ "</button>");
 		pw.println("</form>");
 	}
 
 	public static void createButton(PrintWriter pw, String link, String value) {
-		pw.println("<p>");
-		pw.println("<a href=\"" + link + "\">" + value);
-		pw.println("</p>");
+		pw.println(
+				"<a name='butonsinsup' class='btn btn-primary btn-lg' type=\"button\" class=\"btn btn-default\" href=\""
+						+ link + "\">" + value + "</a>");
+
 	}
 
 	public static boolean isMember(String username, String password) {
@@ -107,6 +112,17 @@ public class Resource {
 				+ " == '" + value2 + "'");
 	}
 
+	public static Query sql_delete(String className, String fieldName1, String value1) {
+
+		return pm.newQuery("DELETE FROM " + className + " WHERE " + fieldName1 + " == '" + value1 + "'");
+	}
+
+	public static Query sql_update(String className, String fieldName1, String value1, String fieldName2,
+			String value2) {
+		return pm.newQuery("UPDATE " + className + " SET " + fieldName1 + " = '" + value1 + "' WHERE " + fieldName2
+				+ " == '" + value2 + "'");
+	}
+
 	public static Query sql_select(String className) {
 		return pm.newQuery("SELECT FROM " + className);
 	}
@@ -115,16 +131,24 @@ public class Resource {
 		return pm.getObjectById(Product.class, productID);
 	}
 
-	public static void updateData(Product product) {
+	public static void insertData(Product product) {
 		pm.makePersistent(product);
 	}
 
-	public static void updateData(Member member) {
+	public static void insertData(Member member) {
 		pm.makePersistent(member);
 	}
 
-	public static void updateData(Order order) {
-		System.out.println("update order: " + pm.makePersistent(order));
+	public static void insertData(Order order) {
+		pm.makePersistent(order);
+	}
+
+	public static void insertData(Session session) {
+		pm.makePersistent(session);
+	}
+
+	public static void deleteData(Session session) {
+		pm.deletePersistent(session);
 	}
 
 	public static void showOrders(PrintWriter pw, String username) {
@@ -132,12 +156,13 @@ public class Resource {
 		List<Order> allOrders = (List<Order>) orderQuery.execute();
 		int orderTotal = 0;
 		if (allOrders.size() == 0) {
-			pw.println("<p>" + message_NoOrder + "</p>");
+			pw.println("<p style=\"color:white;\">" + message_NoOrder + "</p>");
 			return;
 		}
 		String tdAlignCenter = "<td align=\"center\">";
-		pw.println("<h4>Your orders</h4>");
-		pw.println("<table style=\"border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+		pw.println("<h3 style=\" color:white;\">Your orders</h3>");
+		pw.println(
+				"<table class=\"table table-bordered\" style=\"color:white; border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
 		pw.println("<tr>");
 		pw.println("<th>Product Name</th>");
 		pw.println("<th>Product Price</th>");
@@ -167,7 +192,8 @@ public class Resource {
 		Query query = sql_select(Product.class.getName());
 		List<Product> allProducts = (List<Product>) query.execute();
 		pw.println("<h2>Show products</h2>");
-		pw.println("<table style=\"border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+		pw.println(
+				"<table class=\"table table-bordered\" style=\"border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
 		pw.println("<tr>");
 		pw.println("<th>Product Name</th>");
 		pw.println("<th>Product Price</th>");
@@ -190,10 +216,17 @@ public class Resource {
 		pw.println("<p>" + message + "</p>");
 	}
 
-	public static void print(PrintWriter pw, Cookie ck[]) {
+	public static void print(PrintWriter pw, Cookie ck[]) throws ServletException, IOException {
 		String username = getUsername(ck);
-		if (!username.equals("")) {
-			pw.print("Hi ," + username);
+		if (isSignIn(ck)) {
+			printSpaces(pw, 3);
+			pw.print("<p style='color:white;font-size:200%;'>Hi ," + username + "</p>");
+		}
+	}
+
+	public static void printSpaces(PrintWriter pw, int amount) {
+		for (int i = 0; i < amount; i++) {
+			pw.print("&nbsp;");
 		}
 	}
 
@@ -209,11 +242,23 @@ public class Resource {
 		return "";
 	}
 
+	public static String getPassword(Cookie ck[]) {
+		if (ck == null) {
+			return "";
+		}
+		for (Cookie ck1 : ck) {
+			if (ck1.getName().equals("password")) {
+				return ck1.getValue();
+			}
+		}
+		return "";
+	}
+
 	public static void makeProductMenu(PrintWriter pw) {
 		Query query = sql_select(Product.class.getName());
 		List<Product> allProducts = (List<Product>) query.execute();
-		pw.println("<h4>Product : </h4>");
-		pw.println("<p><select name =\"products\" form=\"orderForm\">");
+		pw.println("<h4 style=\"color:white;\">Product : </h4>");
+		pw.println("<p><select id=\"disabledSelect\" class=\"form-control\" name =\"products\" form=\"orderForm\">");
 		for (Product p : allProducts) {
 			pw.print("<option value='" + p.getId() + "'>");
 			pw.print(p.getProductName() + "," + p.getProductPrice());
@@ -233,7 +278,6 @@ public class Resource {
 			productPrice.add(s[1]);
 		}
 		for (int i = 0; i < productName.size(); i++) {
-			System.out.println(productName.get(i) + " , " + productPrice.get(i));
 			Product product = new Product(productName.get(i), productPrice.get(i));
 			pm.makePersistent(product);
 		}
@@ -244,28 +288,40 @@ public class Resource {
 		resp.addCookie(ck);
 	}
 
-	public static void SignOut(HttpServletResponse resp, Cookie ck[]) {
+	public static String addSession(HttpServletRequest req, String sessionName, String sessionValue) {
+		HttpSession session = req.getSession();
+		session.setAttribute(sessionName, sessionValue);
+		return session.getId();
+	}
+
+	public static void signOut(HttpServletRequest req, HttpServletResponse resp) {
+		Cookie ck[] = req.getCookies();
 		if (ck == null) {
 			return;
 		}
 		for (Cookie ck1 : ck) {
-			if (ck1.getName().equals("username")) {
+			if (ck1.getName().equals("username") || ck1.getName().equals("password")) {
 				ck1.setMaxAge(0);
 				resp.addCookie(ck1);
-				return;
 			}
 		}
 	}
 
-	public static void checkSignInStatus(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
-		PrintWriter pw = response.getWriter();
-		Cookie ck[] = request.getCookies();
-		if (getUsername(ck).equals("")) {
-			redirect(response, url_SignIn);
-			return;
-		} else {
-			createSignOutButton(pw);
+	public static boolean isSignIn(Cookie ck[]) throws ServletException, IOException {
+		if (ck == null) {
+			return false;
 		}
+		String username = "";
+		String password = "";
+		for (Cookie ck1 : ck) {
+			String ckName = ck1.getName();
+			if (ckName.equals("username")) {
+				username = ck1.getValue();
+			} else if (ckName.equals("password")) {
+				password = ck1.getValue();
+			}
+		}
+		return (isMember(username, password));
 	}
+
 }

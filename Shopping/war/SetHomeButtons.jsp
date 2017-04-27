@@ -5,8 +5,9 @@
 <%
 	PrintWriter pw = response.getWriter();
 	Cookie ck[] = request.getCookies();
-	if (Resource.getUsername(ck).equals("")) {
+	if (!Resource.isSignIn(ck)) {
 		Resource.createButton(pw, Resource.url_SignUp, Resource.text_SignUp);
+		Resource.printSpaces(pw, 6);
 		Resource.createButton(pw, Resource.url_SignIn, Resource.text_SignIn);
 	} else {
 		Resource.createSignOutButton(pw);

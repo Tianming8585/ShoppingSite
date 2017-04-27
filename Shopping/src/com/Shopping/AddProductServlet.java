@@ -22,7 +22,7 @@ public class AddProductServlet extends HttpServlet {
 		PrintWriter out = resp.getWriter();
 		Product product = new Product(productName, productPrice);
 		try {
-			Resource.updateData(product);
+			Resource.insertData(product);
 			Resource.alert(out, Resource.message_AddProductSuccess);
 			Resource.redirectToHome(req, resp);
 		} catch (Exception e) {
