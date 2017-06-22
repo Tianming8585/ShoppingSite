@@ -29,14 +29,25 @@ public class Resource {
 	public static String url_SignIn = "SignIn.jsp";
 	public static String url_SignOut = "SignOut";
 	public static String url_Servlet = "servlet";
+	public static String url_AddProduct = "AddProduct.html";
 	public static String url_Order = "Order.jsp";
+	public static String url_Order_submit = "Order_submit";
 	public static String url_ShowOrders = "ShowOrders.jsp";
+	public static String url_Admin = "Qqq.jsp";
+	public static String url_AdminManagePage = "eganam.jsp";
+	public static String url_AdminSignIn = "SignIn_admin.jsp";
+	public static String url_AdminManage = "eganam.jsp";
+	public static String url_AdminShowOrders = "ShowOrdersQq.jsp";
+	public static String url_AdminModifyOrder = "OrderModifyQq.jsp";
+	public static String url_AdminShowProducts = "ShowProductsQq.jsp";
+	public static String url_AdminModifyProduct = "ProductModifyQq.jsp";
 	public static String text_Home = "Home";
 	public static String text_SignUp = "SignUp";
 	public static String text_SignIn = "SignIn";
 	public static String text_SignOut = "SignOut";
 	public static String text_Order = "Order";
 	public static String text_ShowOrders = "ShowOrders";
+	public static String text_ManagePage = "ManagePage";
 	private static PersistenceManager pm = PMF.get().getPersistenceManager();
 
 	public static void alert(PrintWriter pw, String message) {
@@ -48,18 +59,18 @@ public class Resource {
 	}
 
 	// won't change
-	public static void redirect(HttpServletRequest req, HttpServletResponse resp, String link)
-			throws ServletException, IOException {
-		req.getRequestDispatcher(link).forward(req, resp);
-	}
+	// public static void redirect(HttpServletRequest req, HttpServletResponse
+	// resp, String link)
+	// throws ServletException, IOException {
+	// req.getRequestDispatcher(link).forward(req, resp);
+	// }
 
 	// change
 	public static void redirect(HttpServletResponse resp, String link) throws ServletException, IOException {
 		resp.sendRedirect(link);
 	}
 
-	public static void redirectToHome(HttpServletRequest req, HttpServletResponse resp)
-			throws ServletException, IOException {
+	public static void redirectToHome(HttpServletResponse resp) throws ServletException, IOException {
 		resp.sendRedirect(url_Home);
 	}
 
@@ -89,8 +100,18 @@ public class Resource {
 
 	public static boolean isMember(String username, String password) {
 		Query query = sql_select(Member.class.getName(), "username", username, "password", password);
-		List<Member> allMembers = (List<Member>) query.execute();
+		System.out.println(query.toString());
+		Object allO = query.execute();
+		List<Member> allMembers = (List<Member>) allO;
 		return !allMembers.isEmpty();
+	}
+
+	public static boolean isAdmin(String username, String password) {
+		Query query = sql_select(Admin.class.getName(), "username", username, "password", password);
+		System.out.println(query.toString());
+		Object allO = query.execute();
+		List<Member> allAdmin = (List<Member>) allO;
+		return !allAdmin.isEmpty();
 	}
 
 	public static boolean isNumeric(String str) {
@@ -108,8 +129,17 @@ public class Resource {
 
 	public static Query sql_select(String className, String fieldName1, String value1, String fieldName2,
 			String value2) {
-		return pm.newQuery("SELECT FROM " + className + " WHERE " + fieldName1 + " == '" + value1 + "'&&" + fieldName2
+		return pm.newQuery("SELECT FROM " + className + " WHERE " + fieldName1 + " == '" + value1 + "' && " + fieldName2
 				+ " == '" + value2 + "'");
+	}
+
+	public static Query sql_select_desc(String className, String descFieldName) {
+		return pm.newQuery("SELECT FROM " + className + " order by " + descFieldName + " desc");
+	}
+
+	public static Query sql_select_desc(String className, String fieldName, String value, String descFieldName) {
+		return pm.newQuery("SELECT FROM " + className + " WHERE " + fieldName + " == '" + value + "' order by "
+				+ descFieldName + " desc");
 	}
 
 	public static Query sql_delete(String className, String fieldName1, String value1) {
@@ -127,8 +157,17 @@ public class Resource {
 		return pm.newQuery("SELECT FROM " + className);
 	}
 
-	public static Product getProductByID(long productID) {
+	public static Product getProductByID(Long productID) {
 		return pm.getObjectById(Product.class, productID);
+	}
+	public static Product getProductByID(PersistenceManager pm, Long productID) {
+		return pm.getObjectById(Product.class, productID);
+	}
+	public static Order getOrderByID(Long orderID) {
+		return pm.getObjectById(Order.class, orderID);
+	}
+	public static Order getOrderByID(PersistenceManager pm,Long orderID) {
+		return pm.getObjectById(Order.class, orderID);
 	}
 
 	public static void insertData(Product product) {
@@ -143,6 +182,10 @@ public class Resource {
 		pm.makePersistent(order);
 	}
 
+	public static void insertData(Admin admin) {
+		pm.makePersistent(admin);
+	}
+
 	public static void insertData(Session session) {
 		pm.makePersistent(session);
 	}
@@ -152,14 +195,52 @@ public class Resource {
 	}
 
 	public static void showOrders(PrintWriter pw, String username) {
-		Query orderQuery = sql_select(Order.class.getName(), "username", username);
+		Query orderQuery = sql_select_desc(Order.class.getName(), "username", username, "date");
 		List<Order> allOrders = (List<Order>) orderQuery.execute();
-		int orderTotal = 0;
 		if (allOrders.size() == 0) {
 			pw.println("<p style=\"color:white;\">" + message_NoOrder + "</p>");
 			return;
 		}
-		String tdAlignCenter = "<td align=\"center\">";
+		String tdAlignCenter = " align=\"center\"";
+		pw.println("<h3 style=\" color:white;\">Your orders</h3>");
+		pw.println(
+				"<table class=\"table table-bordered\" style=\"color:white; border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+		pw.println("<tr>");
+		pw.println("<th>Date</th>");
+		pw.println("<th>Product Name</th>");
+		pw.println("<th>Product Price</th>");
+		pw.println("<th>Amount</th>");
+		pw.println("<th>Total</th>");
+		pw.println("</tr>");
+		for (int i = 0; i < allOrders.size(); i++) {
+			int orderTotal = 0;
+			List<Long> orderList = allOrders.get(i).getOrderList();
+			List<Integer> amountList = allOrders.get(i).getAmount();
+			for (int j = 0; j < orderList.size(); j++) {
+				Product p = (Product) getProductByID(orderList.get(j));
+				int price = Integer.parseInt(p.getProductPrice());
+				int amount = amountList.get(j);
+				int productOrder = price * amount;
+				pw.println("<tr>");
+				if (j == 0)
+					pw.println("<td" + " rowspan=" + orderList.size() + ">" + allOrders.get(i).getDate() + "</td>");
+				pw.println("<td>" + p.getProductName() + "</td>");
+				pw.println("<td>" + price + "</td>");
+				pw.println("<td" + tdAlignCenter + ">" + amount + "</td>");
+				pw.println("<td" + tdAlignCenter + ">" + productOrder + "</td>");
+				pw.println("</tr>");
+				orderTotal += productOrder;
+			}
+			pw.println("<tr>");
+			pw.println("<td colspan=\"4\">總共</td>");
+			pw.println("<td" + tdAlignCenter + ">" + orderTotal + "</td>");
+			pw.println("</tr>");
+		}
+		pw.println("</table>");
+	}
+
+	public static void showOrders(PrintWriter pw, String IDList, String amountList) {
+		String tdAlignCenter = " align=\"center\"";
 		pw.println("<h3 style=\" color:white;\">Your orders</h3>");
 		pw.println(
 				"<table class=\"table table-bordered\" style=\"color:white; border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
@@ -169,24 +250,129 @@ public class Resource {
 		pw.println("<th>Amount</th>");
 		pw.println("<th>Total</th>");
 		pw.println("</tr>");
-		for (Order order : allOrders) {
-			int productPrice = Integer.parseInt(order.getProductPrice());
-			int amount = Integer.parseInt(order.getAmount());
-			int productOrder = productPrice * amount;
+		String IDListArray[] = IDList.split("_");
+		String amountListArray[] = amountList.split("_");
+		int orderTotal = 0;
+		for (int i = 0; i < IDListArray.length; i++) {
+			if (IDListArray[i].equals(""))
+				break;
+			System.out.println(IDListArray[i]);
+			Product p = (Product) getProductByID(Long.parseLong(IDListArray[i].trim()));
+			int price = Integer.parseInt(p.getProductPrice());
+			int amount = Integer.parseInt(amountListArray[i]);
+			int productOrder = price * amount;
 			pw.println("<tr>");
-			pw.println("<td>" + order.getProductName() + "</td>");
-			pw.println(tdAlignCenter + productPrice + "</td>");
-			pw.println(tdAlignCenter + amount + "</td>");
-			pw.println(tdAlignCenter + productOrder + "</td>");
+			pw.println("<td>" + p.getProductName() + "</td>");
+			pw.println("<td>" + price + "</td>");
+			pw.println("<td" + tdAlignCenter + ">" + amount + "</td>");
+			pw.println("<td" + tdAlignCenter + ">" + productOrder + "</td>");
 			pw.println("</tr>");
 			orderTotal += productOrder;
 		}
 		pw.println("<tr>");
 		pw.println("<td colspan=\"3\">總共</td>");
-		pw.println(tdAlignCenter + orderTotal + "</td>");
+		pw.println("<td" + tdAlignCenter + ">" + orderTotal + "</td>");
 		pw.println("</tr>");
 		pw.println("</table>");
 	}
+
+	public static void manageOrders(PrintWriter pw) {
+		Query orderQuery = sql_select_desc(Order.class.getName(), "date");
+		List<Order> allOrders = (List<Order>) orderQuery.execute();
+		if (allOrders.size() == 0) {
+			pw.println("<p style=\"color:white;\">" + message_NoOrder + "</p>");
+			return;
+		}
+		String tdAlignCenter = " align=\"center\"";
+		pw.println("<h3 style=\" color:white;\">Manage orders</h3>");
+		pw.println(
+				"<table class=\"table table-bordered\" style=\"color:white; border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+		pw.println("<tr>");
+		pw.println("<th>Username");
+		pw.println("<th>Date</th>");
+		pw.println("<th>Product Name</th>");
+		pw.println("<th>Product Price</th>");
+		pw.println("<th>Amount</th>");
+		pw.println("<th>Total</th>");
+		pw.println("<th>Action</th>");
+		pw.println("</tr>");
+		for (int i = 0; i < allOrders.size(); i++) {
+			int orderTotal = 0;
+			List<Long> orderList = allOrders.get(i).getOrderList();
+			List<Integer> amountList = allOrders.get(i).getAmount();
+			int orderListSize = orderList.size();
+			boolean isFirst = true;
+			for (int j = 0; j < orderListSize; j++) {
+				Product p = (Product) getProductByID(orderList.get(j));
+				int price = Integer.parseInt(p.getProductPrice());
+				int amount = amountList.get(j);
+				int productOrder = price * amount;
+				pw.println("<tr>");
+				if (isFirst) {
+					pw.println("<td" + " rowspan=" + orderListSize + ">" + allOrders.get(i).getUsername() + "</td>");
+					pw.println("<td" + " rowspan=" + orderListSize + ">" + allOrders.get(i).getDate() + "</td>");
+				}
+				pw.println("<td>" + p.getProductName() + "</td>");
+				pw.println("<td>" + price + "</td>");
+				pw.println("<td" + tdAlignCenter + ">" + amount + "</td>");
+				pw.println("<td" + tdAlignCenter + ">" + productOrder + "</td>");
+				if (isFirst) {
+					pw.println("<td" + " rowspan=" + (orderListSize+1) + "><a href=\"orderModifyQq.jsp?orderId="
+							+ allOrders.get(i).getId() + "\">Modify</a> " + "<a href=\"orderDeleteQq.jsp?orderId="
+							+ allOrders.get(i).getId() + "\">Delete</a>");
+					isFirst = false;
+				}
+				pw.println("</tr>");
+				orderTotal += productOrder;
+			}
+			pw.println("<tr>");
+			pw.println("<td colspan=\"5\">總共</td>");
+			pw.println("<td" + tdAlignCenter + ">" + orderTotal + "</td>");
+			pw.println("</tr>");
+		}
+		pw.println("</table>");
+	}
+
+	// public static void ManageOrders(PrintWriter pw) {
+	// Query orderQuery = sql_select(Order.class.getName());
+	// List<Order> allOrders = (List<Order>) orderQuery.execute();
+	// if (allOrders.size() == 0) {
+	// pw.println("<p style=\"color:white;\">" + message_NoOrder + "</p>");
+	// return;
+	// }
+	// String tdAlignCenter = "<td align=\"center\">";
+	// pw.println("<h3 style=\" color:white;\">Manage Orders</h3>");
+	// pw.println(
+	// "<table class=\"table table-bordered\" style=\"color:white; border:3px
+	// #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+	// pw.println("<tr>");
+	// pw.println("<th>Username");
+	// pw.println("<th>Product Name</th>");
+	// pw.println("<th>Product Price</th>");
+	// pw.println("<th>Amount</th>");
+	// pw.println("<th>Total</th>");
+	// pw.println("<th>Action</th>");
+	// pw.println("</tr>");
+	// for (Order order : allOrders) {
+	// List orderList = order.getOrderList();
+	// List amount = order.getAmount();
+	// for (int i = 0; i < orderList.size(); i++) {
+	// // int productOrder = productPrice * amount;
+	// pw.println("<tr>");
+	// pw.println("<td>" + order.getUsername() + "</td>");
+	// // pw.println("<td>" + order.getProductName() + "</td>");
+	// // pw.println(tdAlignCenter + productPrice + "</td>");
+	// pw.println(tdAlignCenter + amount.get(i) + "</td>");
+	// pw.println(tdAlignCenter + orderList.get(i) + "</td>");
+	// pw.println("<td><a href=\"orderModifyQq.jsp?orderId=" + order.getId() +
+	// "\">Modify</a> "
+	// + "<a href=\"orderDeleteQq.jsp?orderId=" + order.getId() +
+	// "\">Delete</a>");
+	// pw.println("</tr>");
+	// }
+	// }
+	// pw.println("</table>");
+	// }
 
 	public static void showProducts(PrintWriter pw) {
 		Query query = sql_select(Product.class.getName());
@@ -208,6 +394,30 @@ public class Resource {
 		pw.println("</table>");
 	}
 
+	public static void manageProducts(PrintWriter pw) {
+		Query query = sql_select(Product.class.getName());
+		List<Product> allProducts = (List<Product>) query.execute();
+		pw.println("<h2>Manage products</h2>");
+		pw.println("<a href=\"AddProduct.html\">add products</a>");
+		pw.println(
+				"<table class=\"table table-bordered\" style=\"border:3px #000000 solid;padding:5px;width:100%;\" rules=\"all\">");
+		pw.println("<tr>");
+		pw.println("<th>Product Name</th>");
+		pw.println("<th>Product Price</th>");
+		pw.println("<th>Action");
+		pw.println("</tr>");
+		for (Product product : allProducts) {
+			String tdAlignCenter = "<td align=\"center\">";
+			pw.println("<tr>");
+			pw.println("<td>" + product.getProductName() + "</td>");
+			pw.println(tdAlignCenter + product.getProductPrice() + "</td>");
+			pw.println("<td><a href=\"productModifyQq.jsp?productId=" + product.getId() + "\">Modify</a> "
+					+ "<a href=\"productDeleteQq.jsp?productId=" + product.getId() + "\">Delete</a>");
+			pw.println("</tr>");
+		}
+		pw.println("</table>");
+	}
+
 	public static void print(PrintWriter pw, String style, String message) {
 		pw.println("<p style=\"" + style + "\">" + message + "</p>");
 	}
@@ -218,9 +428,12 @@ public class Resource {
 
 	public static void print(PrintWriter pw, Cookie ck[]) throws ServletException, IOException {
 		String username = getUsername(ck);
+		if (ck == null)
+			return;
 		if (isSignIn(ck)) {
-			printSpaces(pw, 3);
-			pw.print("<p style='color:white;font-size:200%;'>Hi ," + username + "</p>");
+			// printSpaces(pw, 3);
+			// pw.print("<p style='color:white;font-size:200%;'>Hi ," + username
+			// + "</p>");
 		}
 	}
 
@@ -236,6 +449,33 @@ public class Resource {
 		}
 		for (Cookie ck1 : ck) {
 			if (ck1.getName().equals("username")) {
+				return ck1.getValue();
+			}
+		}
+		return "";
+	}
+
+	public static String getOrderList(Cookie ck[]) {
+		String v = "";
+		System.out.println("get order list");
+		if (ck == null) {
+			return "";
+		}
+		for (Cookie ck1 : ck) {
+			System.out.println(ck1.getName() + " v: " + ck1.getValue().replaceAll("\n", ""));
+			if (ck1.getName().equals("orderList")) {
+				v = ck1.getValue();
+			}
+		}
+		return v;
+	}
+
+	public static String getAmountList(Cookie ck[]) {
+		if (ck == null) {
+			return "";
+		}
+		for (Cookie ck1 : ck) {
+			if (ck1.getName().equals("amountList")) {
 				return ck1.getValue();
 			}
 		}
@@ -294,6 +534,19 @@ public class Resource {
 		return session.getId();
 	}
 
+	public static void clearOrder(HttpServletRequest req, HttpServletResponse resp) {
+		Cookie ck[] = req.getCookies();
+		if (ck == null) {
+			return;
+		}
+		for (Cookie ck1 : ck) {
+			if (ck1.getName().equals("orderList") || ck1.getName().equals("amountList")) {
+				ck1.setMaxAge(0);
+				resp.addCookie(ck1);
+			}
+		}
+	}
+
 	public static void signOut(HttpServletRequest req, HttpServletResponse resp) {
 		Cookie ck[] = req.getCookies();
 		if (ck == null) {
@@ -322,6 +575,22 @@ public class Resource {
 			}
 		}
 		return (isMember(username, password));
+	}
+	public static boolean isAdmin(Cookie ck[]) throws ServletException, IOException {
+		if (ck == null) {
+			return false;
+		}
+		String username = "";
+		String password = "";
+		for (Cookie ck1 : ck) {
+			String ckName = ck1.getName();
+			if (ckName.equals("username")) {
+				username = ck1.getValue();
+			} else if (ckName.equals("password")) {
+				password = ck1.getValue();
+			}
+		}
+		return (isAdmin(username, password));
 	}
 
 }

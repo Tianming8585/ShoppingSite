@@ -5,7 +5,7 @@
 </head>
 <body>
 	<h2>Add product</h2>
-	<form action="addProduct" method="GET">
+	<form action="servlet" method="GET">
 		<p>
 		<h4>Product name :</h4>
 		<input type="text" name="productName" />
@@ -14,6 +14,7 @@
 		<h4>Product price :</h4>
 		<input type="text" name="productPrice" />
 		</p>
+		<input type="hidden" name="url" value="AddProduct.html" />
 		<input type="submit" name="btnValue" value="Add" />
 	</form>
 </body>

@@ -24,7 +24,7 @@ public class AddProductServlet extends HttpServlet {
 		try {
 			Resource.insertData(product);
 			Resource.alert(out, Resource.message_AddProductSuccess);
-			Resource.redirectToHome(req, resp);
+			Resource.redirect(resp,Resource.url_AdminShowProducts);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -1,6 +1,9 @@
 package com.Shopping;
 
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 import javax.jdo.annotations.IdGeneratorStrategy;
@@ -21,18 +24,27 @@ public class Order {
 	String username;
 
 	@Persistent
-	String productName;
+	List<Long> orderList;
 	@Persistent
-	String productPrice;
-	@Persistent
-	String amount;
+	List<Integer> amount;
 
-	public Order(String username, String productName, String productPrice, String amount) {
+	@Persistent
+	private Date date;
+
+	public Order(String username, List<Long> orderList, List<Integer> amount) {
 		super();
 		this.username = username;
-		this.productName = productName;
-		this.productPrice = productPrice;
+		this.orderList = orderList;
 		this.amount = amount;
+		date = Calendar.getInstance().getTime();
+	}
+
+	public Date getDate() {
+		return date;
+	}
+
+	public void setDate(Date date) {
+		this.date = date;
 	}
 
 	public Long getId() {
@@ -51,27 +63,19 @@ public class Order {
 		this.username = username;
 	}
 
-	public String getProductName() {
-		return productName;
+	public List<Long> getOrderList() {
+		return orderList;
 	}
 
-	public void setProductName(String productName) {
-		this.productName = productName;
+	public void setOrderList(List<Long> orderList) {
+		this.orderList = orderList;
 	}
 
-	public String getProductPrice() {
-		return productPrice;
-	}
-
-	public void setProductPrice(String productPrice) {
-		this.productPrice = productPrice;
-	}
-
-	public String getAmount() {
+	public List<Integer> getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(List<Integer> amount) {
 		this.amount = amount;
 	}
 

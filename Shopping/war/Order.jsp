@@ -27,7 +27,7 @@ body {
 <body>
 	<%
 		if (!Resource.isSignIn(request.getCookies())) {
-			Resource.redirect(request, response, Resource.url_SignIn);
+			Resource.redirect(response, Resource.url_SignIn);
 			return;
 		}
 	%>
@@ -41,10 +41,10 @@ body {
 			type="hidden" name="url" value="Order.jsp" />
 		<p>
 			<button type="submit" class="btn btn-primary value=" name="btnValue"
-				value="Order">Order</button>
+				value="Order">Add</button>
 	</form>
 	<br>
-	<jsp:include page="ShowUserOrders.jsp" />
+	<jsp:include page="ShowCurrentOrder.jsp" />
 	<jsp:include page="AddHomeButton.jsp" />
 </body>
 </html>

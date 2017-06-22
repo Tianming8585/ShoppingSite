@@ -21,7 +21,7 @@ body {
 <body>
 	<%
 		if (!Resource.isSignIn(request.getCookies())) {
-			Resource.redirect(request, response, Resource.url_SignIn);
+			Resource.redirect(response, Resource.url_SignIn);
 			return;
 		}
 	%>

@@ -16,6 +16,34 @@ http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd"
 	</servlet-mapping>
 
 	<servlet>
+		<servlet-name>AdminServlet</servlet-name>
+		<servlet-class>com.Shopping.AdminServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>AdminServlet</servlet-name>
+		<url-pattern>/nimda</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>BackServlet</servlet-name>
+		<servlet-class>com.Shopping.BackServlet</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>BackServlet</servlet-name>
+		<url-pattern>/kcab</url-pattern>
+	</servlet-mapping>
+
+	<servlet>
+		<servlet-name>googleS</servlet-name>
+		<servlet-class>com.Shopping.GoogleServlet</servlet-class>
+	</servlet>
+	<servlet-mapping>
+		<servlet-name>googleS</servlet-name>
+		<url-pattern>/google</url-pattern>
+	</servlet-mapping>
+	<servlet>
 		<servlet-name>MainServlet</servlet-name>
 		<servlet-class>com.Shopping.MainServlet</servlet-class>
 	</servlet>

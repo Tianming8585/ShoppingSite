@@ -2,8 +2,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
 	pageEncoding="UTF-8"%>
 <%
-	if (!Resource.isSignIn(request.getCookies())) {
-		Resource.redirect(response, Resource.url_SignIn);
+	if (!Resource.isAdmin(request.getCookies())) {
+		Resource.redirect(response, Resource.url_AdminSignIn);
 		return;
 	}
 	Resource.createSignOutButton(response.getWriter());
